@@ -82,7 +82,68 @@ $(function() {
         console.log( data );
         var picUrl = data.result.picAddr; // 获取地址
         $('#imgBox img').attr("src", picUrl);
+        $('[name="brandLogo"]').val(picUrl);
+        $('#form').data("bootstrapValidator").updateStatus("brandLogo", "VALID")
       }
+    });
+
+    $('#form').bootstrapValidator({
+      excluded:[],
+      feedbackIcons:{
+        valid:'glyphicon glyphicon-ok',
+        invalid:'glyphicon glyphicon-remove',
+        validating:'glyphicon glyphicon-refresh'
+      },
+      fields:{
+        categoryId:{
+          validators:{
+            notEmpty:{
+              message:"请选择一级分类"
+            }
+          }
+        },
+        brandName:{
+          validators:{
+            notEmpty:{
+              message:"请输入二级分类名称"
+            }
+          }
+        },
+        brandLogo:{
+          validators:{
+            notEmpty:{
+              message:"请上传图片"
+            }
+          }
+        }
+      }
+    });
+
+    $('#form').on("success.form.bv",function(e){
+      e.preventDefault();
+      $ajax({
+        type:"post",
+        url:"/category/addSecondCategory",
+        data:$('#form').serialize(),
+        dataType:"json",
+        success: function( info ) {
+          console.log( info );
+          if ( info.success ) {
+            // 关闭模态框
+            $('#addModal').modal("hide");
+            // 重新渲染第一页
+            currentPage = 1;
+            render();
+  
+            // 重置内容和状态
+            $('#form').data("bootstrapValidator").resetForm(true);
+  
+            // 由于下拉菜单 和 图片不是表单元素, 需要手动重置
+            $('#dropdownText').text("请选择一级分类");
+            $('#imgBox img').attr("src", "./images/none.png");
+          }
+        }
+      })
     })
   
   
